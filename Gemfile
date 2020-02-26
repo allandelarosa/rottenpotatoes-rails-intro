@@ -2,6 +2,11 @@ source 'https://rubygems.org'
 
 ruby '>=2.2.0', '<3.0'
 
+# for some reason, this was not included even though it's necessary
+# needed to run "rake db:migrate", otherwise a "JavaScript runtime" is not found
+gem 'execjs'
+gem 'therubyracer'
+
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.10'
 # Use SCSS for stylesheets
