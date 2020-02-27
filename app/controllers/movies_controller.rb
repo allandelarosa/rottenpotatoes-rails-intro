@@ -12,17 +12,31 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.ratings()
+
+    # default hash to indicate all ratings should be displayed
     default = Hash[@all_ratings.collect { |rating| [rating, 1] } ]
 
     # check if invalid rating selection
+    # if first time visiting page, show all ratings
     if params[:ratings].nil?
-      redirect_to movies_path(ratings: session[:ratings] ? session[:ratings] : default, 
-        sort: params[:sort] )
+      flash.keep # need this in case a message is to be displayed
+      redirect_to movies_path ratings: session[:ratings] ? session[:ratings] : default, 
+        sort: params[:sort]
     end
 
-    session[:ratings] = params[:ratings]
+    # if sort not specified, revert to previous value
+    if params[:sort].nil?
+      params[:sort] = session[:sort]
+    end
 
-    @selected = params[:ratings].nil? ? @all_ratings : params[:ratings].keys
+    # store values in session to save sorting/filtering
+    session[:ratings] = params[:ratings]
+    session[:sort] = params[:sort]
+
+    # keeps track of which ratings are checked
+    # need the conditional, even if redirection occurs before this
+    # entire class must be valid at all times
+    @selected = params[:ratings].keys unless params[:ratings].nil?
     
     # determine what movies are displayed
     @movies = case params[:sort]
@@ -37,6 +51,10 @@ class MoviesController < ApplicationController
     # determine if table header will be highlighted
     @title_class = params[:sort] == "by_title" ? :hilite : ""
     @release_date_class = params[:sort] == "by_release_date" ? :hilite : ""
+
+    # variables for sorting links, to clean up view
+    @title_path = movies_path(sort:"by_title", ratings: params[:ratings])
+    @release_date_path = movies_path(sort:"by_release_date", ratings: params[:ratings])
   end
 
   def new
