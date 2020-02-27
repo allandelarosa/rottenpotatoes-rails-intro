@@ -13,7 +13,7 @@ class MoviesController < ApplicationController
   def index
     @movies= case params[:sort]
     when "by_title"
-      Movie.order(:title)
+      Movie.order(:title).where("rating = ?", 'G')
     when "by_release_date"
       Movie.order(:release_date)
     else
