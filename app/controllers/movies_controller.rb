@@ -12,7 +12,19 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.ratings()
+    default = Hash[@all_ratings.collect { |rating| [rating, 1] } ]
+
+    # check if invalid rating selection
+    if params[:ratings].nil?
+      redirect_to movies_path(ratings: session[:ratings] ? session[:ratings] : default, 
+        sort: params[:sort] )
+    end
+
+    session[:ratings] = params[:ratings]
+
     @selected = params[:ratings].nil? ? @all_ratings : params[:ratings].keys
+    
+    # determine what movies are displayed
     @movies = case params[:sort]
     when "by_title"
       Movie.order(:title).with_ratings(@selected)
@@ -21,6 +33,10 @@ class MoviesController < ApplicationController
     else
       Movie.with_ratings(@selected)
     end
+    
+    # determine if table header will be highlighted
+    @title_class = params[:sort] == "by_title" ? :hilite : ""
+    @release_date_class = params[:sort] == "by_release_date" ? :hilite : ""
   end
 
   def new
